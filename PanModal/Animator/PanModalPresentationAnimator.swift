@@ -79,6 +79,8 @@ public class PanModalPresentationAnimator: NSObject {
 
         // Use panView as presentingView if it already exists within the containerView
         let panView: UIView = transitionContext.containerView.panContainerView ?? toVC.view
+        let fromPanView: PanContainerView? = fromVC.view.superview as? PanContainerView
+        let fromPanPresentable = fromVC as? PanModalPresentable.LayoutType
 
         // Move presented view offscreen (from the bottom)
         panView.frame = transitionContext.finalFrame(for: toVC)
@@ -91,6 +93,16 @@ public class PanModalPresentationAnimator: NSObject {
 
         PanModalAnimator.animate({
             panView.frame.origin.y = yPos
+            
+            guard
+                let fromPanView = fromPanView,
+                let fromPanPresentable = fromPanPresentable,
+                fromPanPresentable.shouldHideWhilePanStacking
+            else {
+                return
+            }
+            
+            fromPanView.frame.origin.y = fromPanView.frame.maxY
         }, config: presentable) { [weak self] didComplete in
             // Calls viewDidAppear and viewDidDisappear
             fromVC.endAppearanceTransition()
@@ -114,9 +126,20 @@ public class PanModalPresentationAnimator: NSObject {
         
         let presentable = panModalLayoutType(from: transitionContext)
         let panView: UIView = transitionContext.containerView.panContainerView ?? fromVC.view
+        let toPanPresentable = toVC as? PanModalPresentable.LayoutType
+        let toPanView = toVC.view.superview as? PanContainerView
 
         PanModalAnimator.animate({
             panView.frame.origin.y = transitionContext.containerView.frame.height
+            
+            guard
+                let toPanPresentable = toPanPresentable,
+                toPanPresentable.shouldHideWhilePanStacking
+            else {
+                return
+            }
+            
+            toPanView?.frame.origin.y = toPanPresentable.shortFormYPos
         }, config: presentable) { didComplete in
             fromVC.view.removeFromSuperview()
             // Calls viewDidAppear and viewDidDisappear
@@ -170,3 +193,4 @@ extension PanModalPresentationAnimator: UIViewControllerAnimatedTransitioning {
 
 }
 #endif
+

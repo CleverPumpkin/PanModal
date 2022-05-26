@@ -12,7 +12,11 @@ import UIKit
  Default values for the PanModalPresentable.
  */
 public extension PanModalPresentable where Self: UIViewController {
-
+    
+    var shouldHideWhilePanStacking: Bool {
+        return false
+    }
+    
     var topOffset: CGFloat {
         return topLayoutOffset + 21.0
     }
