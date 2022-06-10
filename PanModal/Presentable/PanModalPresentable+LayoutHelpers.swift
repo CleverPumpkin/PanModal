@@ -100,12 +100,21 @@ extension PanModalPresentable where Self: UIViewController {
         case .contentHeightIgnoringSafeArea(let height):
             return bottomYPos - height
         case .intrinsicHeight:
-            view.layoutIfNeeded()
-            let targetSize = CGSize(width: (presentedVC?.containerView?.bounds ?? UIScreen.main.bounds).width,
-                                    height: UIView.layoutFittingCompressedSize.height)
-            let intrinsicHeight = view.systemLayoutSizeFitting(targetSize).height
-            return bottomYPos - (intrinsicHeight + bottomLayoutOffset)
+            return intrinsicHeight(ignoreSafeArea: false)
+        case .intrinsicHeightIgnoringSafeArea:
+            return intrinsicHeight(ignoreSafeArea: true)
         }
+    }
+    
+    private func intrinsicHeight(ignoreSafeArea: Bool) -> CGFloat {
+        view.layoutIfNeeded()
+        let targetSize = CGSize(
+            width: (presentedVC?.containerView?.bounds ?? UIScreen.main.bounds).width,
+            height: UIView.layoutFittingCompressedSize.height
+        )
+        let intrinsicHeight = view.systemLayoutSizeFitting(targetSize).height
+        let safeAreaBottomOffset = ignoreSafeArea ? .zero : bottomLayoutOffset
+        return bottomYPos - (intrinsicHeight + safeAreaBottomOffset)
     }
 
     private var rootViewController: UIViewController? {
