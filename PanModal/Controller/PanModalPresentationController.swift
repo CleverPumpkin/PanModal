@@ -299,13 +299,12 @@ public extension PanModalPresentationController {
      - Note: This should be called whenever any
      pan modal presentable value changes after the initial presentation
      */
-    func setNeedsLayoutUpdate() {
+    func setNeedsLayoutUpdate(shouldAdjustVerticalPosition: Bool = true) {
         configureViewLayout()
-        adjustPresentedViewFrame()
+        adjustPresentedViewFrame(shouldAdjustVerticalPosition: shouldAdjustVerticalPosition)
         observe(scrollView: presentable?.panScrollable)
         configureScrollViewInsets()
     }
-
 }
 
 // MARK: - Presented View Layout Configuration
@@ -362,7 +361,7 @@ private extension PanModalPresentationController {
     /**
      Reduce height of presentedView so that it sits at the bottom of the screen
      */
-    func adjustPresentedViewFrame() {
+    func adjustPresentedViewFrame(shouldAdjustVerticalPosition: Bool = true) {
 
         guard let frame = containerView?.frame
             else { return }
@@ -373,7 +372,7 @@ private extension PanModalPresentationController {
                 
         panContainerView.frame.size = frame.size
 
-        if ![shortFormYPosition, longFormYPosition].contains(panFrame.origin.y) {
+        if ![shortFormYPosition, longFormYPosition].contains(panFrame.origin.y) && shouldAdjustVerticalPosition {
             // if the container is already in the correct position, no need to adjust positioning
             // (rotations & size changes cause positioning to be out of sync)
             let yPosition = panFrame.origin.y - panFrame.height + frame.height

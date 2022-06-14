@@ -36,8 +36,8 @@ public extension PanModalPresentable where Self: UIViewController {
 
      - Note: This should be called whenever any of the values for the PanModalPresentable protocol are changed.
      */
-    func panModalSetNeedsLayoutUpdate() {
-        presentedVC?.setNeedsLayoutUpdate()
+    func panModalSetNeedsLayoutUpdate(shouldAdjustVerticalPosition: Bool = true) {
+        presentedVC?.setNeedsLayoutUpdate(shouldAdjustVerticalPosition: shouldAdjustVerticalPosition)
     }
 
     /**
