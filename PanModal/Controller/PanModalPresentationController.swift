@@ -91,6 +91,13 @@ open class PanModalPresentationController: UIPresentationController {
         let defaultTopOffset = presentable?.topOffset ?? 0
         return anchorModalToLongForm ? longFormYPosition : defaultTopOffset
     }
+    
+    /**
+     Length of the bottom layout guide of the presenting view controller.
+     Gives us the safe area inset from the bottom.
+     */
+    
+    private var bottomLayoutOffset: CGFloat = 0
 
     /**
      Configuration object for PanModalPresentationController
@@ -365,8 +372,6 @@ private extension PanModalPresentationController {
 
         guard let frame = containerView?.frame
             else { return }
-
-        let adjustedSize = CGSize(width: frame.size.width, height: frame.size.height - anchoredYPosition)
         
         let panFrame = panContainerView.frame
                 
@@ -379,12 +384,24 @@ private extension PanModalPresentationController {
             presentedView.frame.origin.y = max(yPosition, anchoredYPosition)
         }
         
+        var safeAreaOffset: CGFloat = .zero
+        
+        if case .intrinsicHeight = presentable?.longFormHeight {
+            safeAreaOffset = bottomLayoutOffset
+        }
+        
+        if presentedView.frame.origin.y < anchoredYPosition {
+            safeAreaOffset = .zero
+        }
+        
+        if case .intrinsicHeight = presentable?.shortFormHeight {
+            safeAreaOffset = bottomLayoutOffset
+        }
+        
+        let adjustedSize = CGSize(width: frame.size.width, height: frame.size.height - anchoredYPosition - safeAreaOffset)
+        
         panContainerView.frame.origin.x = frame.origin.x
         presentedViewController.view.frame = CGRect(origin: .zero, size: adjustedSize)
-        
-        // Give the presentedViewController a chance to move its views above the safe area - if they are constrained to it
-        presentedViewController.view.setNeedsLayout()
-        presentedViewController.view.layoutIfNeeded()
     }
 
     /**
@@ -435,7 +452,8 @@ private extension PanModalPresentationController {
         longFormYPosition = layoutPresentable.longFormYPos
         anchorModalToLongForm = layoutPresentable.anchorModalToLongForm
         extendsPanScrolling = layoutPresentable.allowsExtendedPanScrolling
-
+        bottomLayoutOffset = layoutPresentable.bottomLayoutOffset
+        
         containerView?.isUserInteractionEnabled = layoutPresentable.isUserInteractionEnabled
     }
 
@@ -470,7 +488,6 @@ private extension PanModalPresentationController {
             scrollView.contentInsetAdjustmentBehavior = .never
         }
     }
-
 }
 
 // MARK: - Pan Gesture Event Handler
