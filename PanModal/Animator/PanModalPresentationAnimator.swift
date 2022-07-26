@@ -70,9 +70,10 @@ public class PanModalPresentationAnimator: NSObject {
             else { return }
 
         let presentable = panModalLayoutType(from: transitionContext)
-
+        let isApplicationActive = UIApplication.isActive
+        
         // Calls viewWillAppear and viewWillDisappear
-        fromVC.beginAppearanceTransition(false, animated: true)
+        fromVC.beginAppearanceTransition(false, animated: isApplicationActive)
         
         // Presents the view in shortForm position, initially
         let yPos: CGFloat = presentable?.shortFormYPos ?? 0.0
@@ -86,12 +87,7 @@ public class PanModalPresentationAnimator: NSObject {
         panView.frame = transitionContext.finalFrame(for: toVC)
         panView.frame.origin.y = transitionContext.containerView.frame.height
 
-        // Haptic feedback
-        if presentable?.isHapticFeedbackEnabled == true {
-            feedbackGenerator?.selectionChanged()
-        }
-
-        PanModalAnimator.animate({
+        let animation = {
             panView.frame.origin.y = yPos
             
             guard
@@ -103,12 +99,26 @@ public class PanModalPresentationAnimator: NSObject {
             }
             
             fromPanView.frame.origin.y = fromPanView.frame.maxY
-        }, config: presentable) { [weak self] didComplete in
-            // Calls viewDidAppear and viewDidDisappear
+        }
+        
+        let completion = { [weak self] (didComplete: Bool) in
             fromVC.endAppearanceTransition()
             transitionContext.completeTransition(didComplete)
             self?.feedbackGenerator = nil
         }
+        
+        guard isApplicationActive else {
+            animation()
+            completion(true)
+            return
+        }
+        
+        // Haptic feedback
+        if presentable?.isHapticFeedbackEnabled == true {
+            feedbackGenerator?.selectionChanged()
+        }
+        
+        PanModalAnimator.animate(animation, config: presentable, completion)
     }
 
     /**
@@ -119,17 +129,21 @@ public class PanModalPresentationAnimator: NSObject {
         guard
             let toVC = transitionContext.viewController(forKey: .to),
             let fromVC = transitionContext.viewController(forKey: .from)
-            else { return }
+        else {
+            return
+        }
+        
+        let isApplicationActive = UIApplication.isActive
 
         // Calls viewWillAppear and viewWillDisappear
-        toVC.beginAppearanceTransition(true, animated: true)
+        toVC.beginAppearanceTransition(true, animated: isApplicationActive)
         
         let presentable = panModalLayoutType(from: transitionContext)
         let panView: UIView = transitionContext.containerView.panContainerView ?? fromVC.view
         let toPanPresentable = toVC as? PanModalPresentable.LayoutType
         let toPanView = toVC.view.superview as? PanContainerView
 
-        PanModalAnimator.animate({
+        let animation = {
             panView.frame.origin.y = transitionContext.containerView.frame.height
             
             guard
@@ -140,12 +154,22 @@ public class PanModalPresentationAnimator: NSObject {
             }
             
             toPanView?.frame.origin.y = toPanPresentable.shortFormYPos
-        }, config: presentable) { didComplete in
+        }
+        
+        let completion = { (didComplete: Bool) in
             fromVC.view.removeFromSuperview()
             // Calls viewDidAppear and viewDidDisappear
             toVC.endAppearanceTransition()
             transitionContext.completeTransition(didComplete)
         }
+        
+        guard isApplicationActive else {
+            animation()
+            completion(true)
+            return
+        }
+        
+        PanModalAnimator.animate(animation, config: presentable, completion)
     }
 
     /**
@@ -192,5 +216,17 @@ extension PanModalPresentationAnimator: UIViewControllerAnimatedTransitioning {
     }
 
 }
-#endif
 
+// MARK: - UIApplication+isActive
+
+private extension UIApplication {
+    
+    static var isActive: Bool {
+        guard let application = UIApplication.value(forKeyPath: #keyPath(UIApplication.shared)) as? UIApplication else {
+            return false
+        }
+        
+        return application.applicationState == .active
+    }
+}
+#endif
