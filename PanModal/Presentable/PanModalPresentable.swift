@@ -179,6 +179,19 @@ public protocol PanModalPresentable: AnyObject {
     var showDragIndicator: Bool { get }
 
     /**
+     A flag to determine if a scroll indicator should be shown.
+
+     Default value is true.
+     */
+    var showScrollIndicator: Bool { get }
+    
+    /**
+     A flag to determine if a scroll view content insets adjustment is enabled.
+
+     Default value is true.
+     */
+    var shouldAdjustScrollViewContentInsets: Bool { get }
+    /**
      Asks the delegate if the pan modal should respond to the pan modal gesture recognizer.
      
      Return false to disable movement on the pan modal but maintain gestures on the presented view.

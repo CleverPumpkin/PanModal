@@ -463,16 +463,20 @@ private extension PanModalPresentationController {
     func configureScrollViewInsets() {
 
         guard
-            let scrollView = presentable?.panScrollable,
+            let presentable = presentable,
+            let scrollView = presentable.panScrollable,
+            presentable.shouldAdjustScrollViewContentInsets,
             !scrollView.isScrolling
-            else { return }
+        else {
+            return
+        }
 
         /**
          Disable vertical scroll indicator until we start to scroll
          to avoid visual bugs
          */
         scrollView.showsVerticalScrollIndicator = false
-        scrollView.scrollIndicatorInsets = presentable?.scrollIndicatorInsets ?? .zero
+        scrollView.scrollIndicatorInsets = presentable.scrollIndicatorInsets
 
         /**
          Set the appropriate contentInset as the configuration within this class
@@ -793,7 +797,12 @@ private extension PanModalPresentationController {
      */
     func trackScrolling(_ scrollView: UIScrollView) {
         scrollViewYOffset = max(scrollView.contentOffset.y, 0)
-        scrollView.showsVerticalScrollIndicator = true
+        
+        if let showScrollIndicator = presentable?.showScrollIndicator {
+            scrollView.showsVerticalScrollIndicator = showScrollIndicator
+        } else {
+            scrollView.showsVerticalScrollIndicator = true
+        }
     }
 
     /**

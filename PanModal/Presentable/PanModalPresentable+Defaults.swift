@@ -100,6 +100,14 @@ public extension PanModalPresentable where Self: UIViewController {
     var showDragIndicator: Bool {
         return shouldRoundTopCorners
     }
+    
+    var showScrollIndicator: Bool {
+        return true
+    }
+    
+    var shouldAdjustScrollViewContentInsets: Bool {
+        return true
+    }
 
     func shouldRespond(to panModalGestureRecognizer: UIPanGestureRecognizer) -> Bool {
         return true
