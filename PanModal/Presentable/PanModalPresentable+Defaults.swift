@@ -27,11 +27,11 @@ public extension PanModalPresentable where Self: UIViewController {
 
     var longFormHeight: PanModalHeight {
 
-        guard let scrollView = panScrollable
-            else { return .maxHeight }
-
+        guard let scrollView = panScrollable else { return .maxHeight }
+        
         // called once during presentation and stored
         scrollView.layoutIfNeeded()
+        
         return .contentHeight(scrollView.contentSize.height)
     }
 
@@ -69,11 +69,11 @@ public extension PanModalPresentable where Self: UIViewController {
     }
 
     var allowsExtendedPanScrolling: Bool {
-
-        guard let scrollView = panScrollable
-            else { return false }
-
+        
+        guard let scrollView = panScrollable else { return false }
+        
         scrollView.layoutIfNeeded()
+        
         return scrollView.contentSize.height > (scrollView.frame.height - bottomLayoutOffset)
     }
 
@@ -108,13 +108,17 @@ public extension PanModalPresentable where Self: UIViewController {
     var shouldAdjustScrollViewContentInsets: Bool {
         return true
     }
+    
+    var dimmedBackgrondTouchesDelegateView: UIView? {
+        return nil
+    }
 
     func shouldRespond(to panModalGestureRecognizer: UIPanGestureRecognizer) -> Bool {
         return true
     }
 
     func willRespond(to panModalGestureRecognizer: UIPanGestureRecognizer) {
-
+        // no-op
     }
 
     func shouldTransition(to state: PanModalPresentationController.PresentationState) -> Bool {
@@ -126,15 +130,15 @@ public extension PanModalPresentable where Self: UIViewController {
     }
 
     func willTransition(to state: PanModalPresentationController.PresentationState) {
-
+        // no-op
     }
 
     func panModalWillDismiss() {
-
+        // no-op
     }
 
     func panModalDidDismiss() {
-
+        // no-op
     }
 }
 #endif

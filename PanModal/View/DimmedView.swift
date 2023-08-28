@@ -12,7 +12,9 @@ import UIKit
  A dim view for use as an overlay over content you want dimmed.
  */
 public class DimmedView: UIView {
-
+    
+    // MARK: - Internal types
+    
     /**
      Represents the possible states of the dimmed view.
      max, off or a percentage of dimAlpha.
@@ -22,9 +24,9 @@ public class DimmedView: UIView {
         case off
         case percent(CGFloat)
     }
-
-    // MARK: - Properties
-
+    
+    // MARK: - Internal properties
+    
     /**
      The state of the dimmed view
      */
@@ -40,37 +42,87 @@ public class DimmedView: UIView {
             }
         }
     }
-
+    
     /**
      The closure to be executed when a tap occurs
      */
     var didTap: ((_ recognizer: UIGestureRecognizer) -> Void)?
-
+    
+    // MARK: - Private properties
     /**
      Tap gesture recognizer
      */
-    private lazy var tapGesture: UIGestureRecognizer = {
-        return UITapGestureRecognizer(target: self, action: #selector(didTapView))
-    }()
-
+    private let dimColor: UIColor
+    private lazy var tapGesture  = makeTapGestureRecognizer()
+    private weak var touchesDelegateView: UIView?
+    
     // MARK: - Initializers
 
-    init(dimColor: UIColor = UIColor.black.withAlphaComponent(0.7)) {
+    init(
+        dimColor: UIColor = UIColor.black.withAlphaComponent(0.7),
+        touchesDelegateView: UIView?
+    ) {
+        self.dimColor = dimColor
+        self.touchesDelegateView = touchesDelegateView
+        
         super.init(frame: .zero)
-        alpha = 0.0
-        backgroundColor = dimColor
-        addGestureRecognizer(tapGesture)
+        
+        setupUI()
     }
-
+    
+    @available(*, unavailable)
     required public init?(coder aDecoder: NSCoder) {
         fatalError()
     }
-
+    
+    // MARK: - Public methods
+    
+    public override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        guard let view = super.hitTest(point, with: event) else {
+            return nil
+        }
+        
+        guard let touchesDelegateView, view === self else {
+            return view
+        }
+        
+        return touchesDelegateView.hitTest(
+            touchesDelegateView.convert(point, from: self),
+            with: event
+        )
+    }
+    
+    // MARK: - Private methods
+    
+    private func setupUI() {
+        
+        alpha = 0.0
+        backgroundColor = dimColor
+        
+        if touchesDelegateView == nil {
+            addGestureRecognizer(tapGesture)
+        } else {
+            isUserInteractionEnabled = true
+        }
+    }
+    
     // MARK: - Event Handlers
 
-    @objc private func didTapView() {
+    @objc
+    private func didTapView() {
         didTap?(tapGesture)
     }
+}
 
+// MARK: - Factory
+
+private extension DimmedView {
+    
+    func makeTapGestureRecognizer() -> UITapGestureRecognizer {
+        UITapGestureRecognizer(
+            target: self,
+            action: #selector(didTapView)
+        )
+    }
 }
 #endif

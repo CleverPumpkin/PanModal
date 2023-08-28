@@ -114,9 +114,14 @@ open class PanModalPresentationController: UIPresentationController {
     private lazy var backgroundView: DimmedView = {
         let view: DimmedView
         if let color = presentable?.panModalBackgroundColor {
-            view = DimmedView(dimColor: color)
+            view = DimmedView(
+                dimColor: color,
+                touchesDelegateView: presentable?.dimmedBackgrondTouchesDelegateView
+            )
         } else {
-            view = DimmedView()
+            view = DimmedView(
+                touchesDelegateView: presentable?.dimmedBackgrondTouchesDelegateView
+            )
         }
         view.didTap = { [weak self] _ in
             if self?.presentable?.allowsTapToDismiss == true {
@@ -342,8 +347,7 @@ private extension PanModalPresentationController {
          If the presented view controller does not conform to pan modal presentable
          don't configure
          */
-        guard let presentable = presentable
-            else { return }
+        guard let presentable = presentable else { return }
 
         /**
          ⚠️ If this class is NOT used in conjunction with the PanModalPresentationAnimator
@@ -351,8 +355,12 @@ private extension PanModalPresentationController {
          in the presentation animator instead of here
          */
         containerView.addSubview(presentedView)
-        containerView.addGestureRecognizer(panGestureRecognizer)
-
+        if presentable.dimmedBackgrondTouchesDelegateView == nil {
+            containerView.addGestureRecognizer(panGestureRecognizer)
+        } else {
+            panContainerView.addGestureRecognizer(panGestureRecognizer)
+        }
+        
         if presentable.showDragIndicator {
             addDragIndicatorView(to: presentedView)
         }
@@ -921,5 +929,9 @@ private extension UIScrollView {
     var isScrolling: Bool {
         return isDragging && !isDecelerating || isTracking
     }
+}
+
+private final class ConteinerView: UIView {
+    
 }
 #endif

@@ -186,6 +186,13 @@ public protocol PanModalPresentable: AnyObject {
     var showScrollIndicator: Bool { get }
     
     /**
+     A view that can handle touches from a dimmed background
+
+     Default value is nil.
+     */
+    var dimmedBackgrondTouchesDelegateView: UIView? { get }
+    
+    /**
      A flag to determine if a scroll view content insets adjustment is enabled.
 
      Default value is true.
