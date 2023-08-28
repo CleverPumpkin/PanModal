@@ -205,14 +205,18 @@ open class PanModalPresentationController: UIPresentationController {
     }
 
     override public func presentationTransitionDidEnd(_ completed: Bool) {
+        backgroundView.canPassTouches = true
+        
         if completed { return }
-
+        
         backgroundView.removeFromSuperview()
     }
 
     override public func dismissalTransitionWillBegin() {
         presentable?.panModalWillDismiss()
-
+        
+        backgroundView.canPassTouches = false
+        
         guard let coordinator = presentedViewController.transitionCoordinator else {
             backgroundView.dimState = .off
             return

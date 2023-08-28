@@ -48,6 +48,11 @@ public class DimmedView: UIView {
      */
     var didTap: ((_ recognizer: UIGestureRecognizer) -> Void)?
     
+    /**
+     Flag responsible for the ability to forward touches to the delegate
+     */
+    var canPassTouches = false
+    
     // MARK: - Private properties
     /**
      Tap gesture recognizer
@@ -82,7 +87,7 @@ public class DimmedView: UIView {
             return nil
         }
         
-        guard let touchesDelegateView, view === self else {
+        guard let touchesDelegateView, view === self, canPassTouches else {
             return view
         }
         
