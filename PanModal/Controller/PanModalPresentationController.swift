@@ -185,23 +185,30 @@ open class PanModalPresentationController: UIPresentationController {
     }
 
     override public func presentationTransitionWillBegin() {
-
-        guard let containerView = containerView
-            else { return }
-
+        
+        guard let containerView = containerView else {
+            return
+        }
+        
+        if panContainerView.frame == .zero {
+            adjustPresentedViewFrame()
+        }
+        
         layoutBackgroundView(in: containerView)
         layoutPresentedView(in: containerView)
         configureScrollViewInsets()
-
+        
         guard let coordinator = presentedViewController.transitionCoordinator else {
             backgroundView.dimState = .max
             return
         }
-
-        coordinator.animate(alongsideTransition: { [weak self] _ in
-            self?.backgroundView.dimState = .max
-            self?.presentedViewController.setNeedsStatusBarAppearanceUpdate()
-        })
+        
+        coordinator.animate(
+            alongsideTransition: { [weak self] _ in
+                self?.backgroundView.dimState = .max
+                self?.presentedViewController.setNeedsStatusBarAppearanceUpdate()
+            }
+        )
     }
 
     override public func presentationTransitionDidEnd(_ completed: Bool) {
